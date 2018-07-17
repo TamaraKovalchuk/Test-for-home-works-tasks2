@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="/simple.css">
+    <title>Team lv-330</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" ></script>
+</head>
+
+<body>
+    <div class="list">
+        <h1>Team lv-330</h1>
+        <ul id="ul">
+        <% teammates.forEach(function(mate) { %>
+            <li id="<%= mate.id %>" ><%= mate.firstName + ' ' + mate.lastName %>
+                    <input class="edit" type="submit" value="Edit" />
+                <form id="form-edit-<%= mate.id %>" action= "/edit/<%= mate.id %>" method="post">
+                      <p>First name:</p><br>
+                      <input type="text" id="firstname-edit-<%= mate.id %>" name="firstname" value= <%= mate.firstName %> >
+                      <br>
+                      <p>Last name:</p><br>
+                      <input type="text" id="lastname-edit-<%= mate.id %>" name="lastname" value= <%= mate.lastName %>>
+                      <br><br>
+                      <input  onclick="editUser(<%= mate.id %>);" type="button" value="Save">
+                </form>
+
+                    <input onclick="sId(<%= mate.id %>);" type="button" value="Delete" />
+
+
+            </li>
+
+        <% }); %>
+        </ul>
+        <form id="form-add" action="/" method="POST" >
+          First name:<br>
+          <input type="text" id="firstname-add" name="firstname" >
+          <br>
+          Last name:<br>
+          <input type="text" id="lastname-add" name="lastname" >
+          <br><br>
+          <input id="save" type="submit" value="Save">
+        </form>
+    </div>
+    <script>
+
+let list = document.getElementsByClassName('edit');
+for (let i = 0; i < list.length; i++) {
+  list[i].onclick = function () {
+    console.log('clicked edit');
+    list[i].nextElementSibling.style.display = 'block';
+  };
+};
+//add
+$(document).ready(function () {
+  $('#form-add').submit(function (e) {
+    e.preventDefault();
+    const firstname = $('#firstname-add').val();
+    const lastname = $('#lastname-add').val();
+    const url = $(this).attr('action');
+    // console.log(form);
+    $.post(url, {
+      firstname: firstname,
+      lastname: lastname
+    }).done(function (data) {
+      console.log('Post Saved');
+      console.log(data.id);
+      $('ul#ul').append(
+        '<li id="'+data.id+'">' + data.firstName + ' ' + data.lastName +
+        '<input class="edit" type="submit" value="Edit" />' +
+        '<form id="form-edit-'+data.id+'" action= "/edit/'+data.id+'" method="post">' +
+        '<p>First name:</p><br>' +
+        '<input type="text" id="firstname-edit-'+data.id+'" name="firstname" value= '+data.firstName+' >' +
+        '<br>' +
+        '<p>Last name:</p><br>' +
+        '<input type="text" id="lastname-edit-'+data.id+'" name="lastname" value= '+data.lastName+' >' +
+        ' <br><br>' +
+        '<input onclick="editUser('+data.id+');" type="button" value="Save">' +
+        '</form>' +
+        '<input onclick="sId('+data.id+');" type="button" value="Delete" />' +
+        '</li>'
+        // '<li>' + firstname + ' ' + lastname +
+        // '<input class="edit" type="submit" value="Edit" />' +
+        // '<form class="id-form" action= "/edit/' + lastname + '" method="post">' +
+        // '<p>First name:</p><br>' +
+        // '<input type="text" id="firstname" name="firstname">' +
+        // '<br>' +
+        // '<p>Last name:</p><br>' +
+        // '<input type="text" id="lastname" name="lastname">' +
+        // ' <br><br>' +
+        // '<input id="save" type="submit" value="Save">' +
+        // '</form>' +
+        // '<form action="/delete/' + lastname + '">' +
+        // '<input id="delete" type="submit" value="Delete" />' +
+        // '</form>' +
+        // '</li>'
+      );
+      // console.log(form);
+      let list = document.getElementsByClassName('edit');
+      for (let i = 0; i < list.length; i++) {
+        list[i].onclick = function () {
+          console.log('clicked edit');
+          list[i].nextElementSibling.style.display = 'block';
+        };
+      };
+    });
+  });
+});
+//delete
+function sId(someId){
+  $.ajax({
+    url: '/delete/' + someId,
+    type: 'DELETE',
+    success: function (result) {
+      console.log(result);
+      $( "li#"+someId ).remove();
+    }
+  });
+};
+//edit
+function editUser(someId){
+    let _form = $('#form-edit-'+someId);
+    const firstnameAdd = _form.find('#firstname-edit-'+someId).val();
+    const lastnameAdd = _form.find('#lastname-edit-'+someId).val();
+    const url = _form.attr('action');
+      $.post(url, {
+        firstname: firstnameAdd,
+        lastname: lastnameAdd
+      }).done(function (data) {
+        _form.parent()[0].childNodes[0].nodeValue = firstnameAdd +' '+lastnameAdd;
+        _form.hide();
+      });
+    };
+
+    </script>
+
+
+</body>
+
+</html>
