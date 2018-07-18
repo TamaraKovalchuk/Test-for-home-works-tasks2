@@ -1,71 +1,60 @@
-const path = require('path');
-const fs = require('fs');
-const express = require('express');
+let mongoDBFunctions = require("./mongo-DB-functions.js");
+const mongoClient = require("mongodb").MongoClient;
+const urlDB = "mongodb://localhost:27017/";
+const path = require("path");
+const express = require("express");
 const app = express();
 
 // setup body parsers
-let bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({extended: true}));
+let bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-// view engine setup
-app.set('views', path.join(__dirname, 'templates'));
-app.set('view engine', 'ejs');
-
-
-//css
-app.use(express.static(path.join(__dirname, 'public')));
-
 let saveData;
 let freeId = 9;
-    fs.readFile('./teammates.json', (err, data) => {
-        if (err) throw err;
-        saveData = JSON.parse(data).teammates;
-
-    });
-
 
 const router = express.Router();
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-    // fs.readFile('./teammates.json', (err, data) => {
-    //     if (err) throw err;
-        res.render('team', {teammates:saveData});
-    // });
+router.get("/", function(req, res, next) {
+    mongoDBFunctions.getTeam(urlDB, mongoClient, res, (res, data) => {
+        res.send(data);
+    });
 });
 
 //request:delete
-router.delete('/delete/:id', (req, res) => {
-    saveData = saveData.filter(function(item) {
-      return item.id != req.params.id;
+router.delete("/delete/:id", (req, res) => {
+    mongoDBFunctions.deleteSomeStudent(urlDB, mongoClient, res, parseInt(req.params.id), (res) => {
+        res.send();
     });
-    res.send();
+
 });
 //add
-router.post('/', (req, res) => {
+router.post("/", (req, res) => {
     console.log(req.body);
-    let newStudent = {id: freeId++, firstName: req.body.firstname, lastName: req.body.lastname};
-   saveData = [...saveData, newStudent];
-   res.send(newStudent);
+    let newStudent = {
+        id: freeId++,
+        firstName: req.body.firstname,
+        lastName: req.body.lastname
+    };
+    mongoDBFunctions.insertNewStudent(urlDB, mongoClient, res, newStudent, (res, Student) => {
+        res.send(Student);
+    });
 
 });
 //edit
-router.post('/edit/:id', (req, res) => {
-        saveData.forEach(function(item) {
-        if(item.id == req.params.id){
-            item.lastName = req.body.lastname;
-            item.firstName = req.body.firstname;
-            console.log('Edit'+req.body.lastname);
-        }
+router.post("/edit/:id", (req, res) => {
+     let student = {
+        firstName: req.body.firstname,
+        lastName: req.body.lastname
+    };
+    mongoDBFunctions.editStudent(urlDB, mongoClient, res,
+     parseInt(req.params.id), student, (res, student) => {
+        res.send(student);
     });
-    res.send();
 });
 
 let port = 3000;
-app.use('/', router);
-
-app.set('port', port);
-const http = require('http');
+app.use("/", router);
+app.set("port", port);
+const http = require("http");
 let server = http.createServer(app);
-
 server.listen(port);
