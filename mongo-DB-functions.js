@@ -3,7 +3,7 @@ module.exports.getTeam = (url, dbClient, res, callback) => {
         if (err) {
             return console.log(err);
         }
-        const db = client.db("teamlist");
+        const db = client.db("listReact");
         const collection = db.collection("teammates");
 
         // GET ALL
@@ -21,7 +21,7 @@ module.exports.deleteSomeStudent = (url, dbClient, res, studentId, callback) => 
         if (err) {
             return console.log(err);
         }
-        const db = client.db("teamlist");
+        const db = client.db("listReact");
         const collection = db.collection("teammates");
 
         console.log(studentId);
@@ -39,7 +39,7 @@ module.exports.insertNewStudent = (url, dbClient, res, student, callback) => {
         if (err) {
             return console.log(err);
         }
-        const db = client.db("teamlist");
+        const db = client.db("listReact");
         const collection = db.collection("teammates");
 
        // INSERT/EDD
@@ -58,12 +58,12 @@ module.exports.editStudent = (url, dbClient, res, studentId, student, callback) 
         if (err) {
             return console.log(err);
         }
-        const db = client.db("teamlist");
+        const db = client.db("listReact");
         const collection = db.collection("teammates");
 
        // EDIT
         collection.updateOne({ id : studentId }
-            , { $set: { lastName : student.lastName, firstName: student.firstName } }, function(err, result) {
+            , { $set: { nameStudent : student.nameStudent } }, function(err, result) {
             console.log("Updated document");
             callback(res, student);
           });
